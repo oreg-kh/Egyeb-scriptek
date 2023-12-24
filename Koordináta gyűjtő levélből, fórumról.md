@@ -1,0 +1,1 @@
+A script a levélben, illetve fórumon kapott/közölt bármilyen koordinátát gyűjti ki, ha rákattintunk, szeretném kérni a supp engedélyét. Úgy működik mint a térképes koordi gyűjtő csak levélben, nagyban könnyítené a játékosoknak a kapott arma cp-k kigyűjtését, stb..
