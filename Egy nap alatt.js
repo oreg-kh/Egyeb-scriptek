@@ -1,90 +1,41 @@
-//Legyőzött egységek támadóként:
 javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=kill_att&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
+var htmlContent = `<table align="center">
+    <tr>
+        <td>
+            <label for="sablon">Egy nap alatt: </label>
+            <select id="sablon">
+                <option></option>
+                <option value="kill_att">Legyőzött egységek támadóként</option>
+                <option value="kill_def">Legyőzött egységek védőként</option>
+                <option value="kill_sup">Legyőzött egységek támogatóként</option>
+                <option value="loot_res">Farmolt nyersanyagok</option>
+                <option value="loot_vil">Kifosztott falvak</option>
+                <option value="scavenge">Összegyűjtött nyersanyagok</option>
+                <option value="conquer">Meghódított falvak</option>
+            </select>
+        </td>
+    </tr>
+</table>`;
 
-//Legyőzött egységek védőként:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=kill_def&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
+function getData(text) {
+    $.get(`${game_data.link_base_pure}ranking&mode=in_a_day&type=${text}&name=${game_data.player.name}`,function(data,status,xhr) {
+        UI.SuccessMessage($(data).find("#content_value").find("b").text(),5000);
+    })
+}
 
-//Legyőzött egységek támogatóként:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=kill_sup&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
+function popup() {        
+    Dialog.show('öreg-popup', function(container) {
+        $(htmlContent).appendTo(container);
+        select();
+    });
+}
 
-//Farmolt nyersanyagok:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=loot_res&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
+function select() {
+    $("#sablon").on("change", function(event) {
+        var option = event.currentTarget.selectedOptions[0].value;
+        getData(option);
+    })
+}
 
-//Kifosztott falvak:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=loot_vil&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
-
-//Összegyűjtött nyersanyagok:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=scavenge&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
-void(0);
-
-//Meghódított falvak:
-javascript:
-$.ajax({
-    url: `${game_data.link_base_pure}ranking&mode=in_a_day&type=conquer&name=${game_data.player.name}`,
-    type: 'GET',
-    async: true,
-    success: function(xml) {
-        UI.SuccessMessage($(xml).find("#content_value > table > tbody > tr > td:nth-child(2) > p:nth-child(4) > b").text(),5000);
-    },
-    error: function(xhr, statusText, error) {}
-})
+popup()
 void(0);
