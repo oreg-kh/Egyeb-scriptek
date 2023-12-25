@@ -1,0 +1,1 @@
+A script a TW Stats élő foglalások részéből nyeri ki az adatokat. A játékon belül bárhol lehet futtatni. Felismeri melyik szerveren vagyunk belépve, ennek megfelelően kéri le a foglalásokat TW Stats-ról.
