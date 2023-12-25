@@ -1,0 +1,1 @@
+A script a beérkező felületen az erősítés kérése gomb lenyomása után használható. Kicseréli a szövegban az egységek neveit az ikonjukra. Csak a játék beépített címkézője által használt neveket képes kicserélni, egyéb fantázianeveket nem.
