@@ -1,0 +1,1 @@
+A jutalmaknál összesíti a begyűjthető nyersanyagokat. Ezekhez az adatokhoz csak akkor férhetünk hozzá, ha az igényeld gombra kattintunk, viszont ekkor ez a nyersi a raktárba kerülne. A script ezért a gyülekezőhely nyersijét "igényli", ami már fel van építve a kezdő falvakban(általában), így jutalom sem jár érte, tehát nem kerül be a raktárba sem mikor futtatjuk.
