@@ -1,165 +1,367 @@
 javascript:
-function formatDateToString(date) {
-    // get day
-    dd = (date.getDate() < 10 ? '0' : '') + date.getDate();
-    // get month
-    mm = ((date.getMonth() + 1) < 10 ? '0' : '') + (date.getMonth() + 1);
-    // get year
-    yyyy = date.getFullYear();
-    // return date
-    return [yyyy + "-" + mm + "-" + dd, yyyy, mm, dd];
-    }
+var obj = {};
+var worksheet = "Fórum aktivitás mérő";
+var uri = "data:application/vnd.ms-excel;base64,";
+var textarea = "textarea#scriptused_text";
+var textarea_html = '<tr><td><textarea id="scriptused_text" onclick="selectTextarea()" rows="5" cols="30"></td></tr>';
+var container = $(".forum-container .clearfix").find("tbody").first();
+var htmlcontent = {
+    text: [
+        `<tr><td>
+            <input class=date id="from" onchange="saveInputsValue()" type="date" value=${defaultInputsValue("from")}>-tól</input>`,
+            `<input class=date id="to" onchange="saveInputsValue()" type="date" value=${defaultInputsValue("to")}>-ig</input>`,
+            `<select id="sablon">`,
+                `<option>Klán fórum</option>`,
+                `<option>Külső fórum</option>`,
+                `<option>Excel táblázat</option>`,
+            `</select>`,
+            `<button class=button id=save onclick="save()" type="button">Mentés</button>`,
+            `<button class=button id=clearnames onclick="removeDatas()" type="button">Adatok törlése</button>`,
+            `<button class=button id=datas onclick="addDataToStorage()" type="button">Adatok tárolása</button>`,
+            `<b><code>>> Created by <a href="https://forum.klanhaboru.hu/index.php?members/öreg.19216" target="_blank">öreg</a></code></b>
+         </td></tr>`
+          ].join("&nbsp;")
+}
+var template = [
+    `<html `,
+        `xmlns:o="urn:schemas-microsoft-com:office:office" `,
+        `xmlns:x="urn:schemas-microsoft-com:office:excel" `,
+        `xmlns="http://www.w3.org/TR/REC-html40">`,
+        `<meta http-equiv="content-type" `,
+        `content="application/vnd.ms-excel; `,
+        `charset=UTF-8">`,
+        `<head>`,
+            `<!--[if gte mso 9]>`,
+                `<xml>`,
+                    `<x:ExcelWorkbook>`,
+                    `<x:ExcelWorksheets>`,
+                    `<x:ExcelWorksheet>`,
+                    `<x:Name>${worksheet}</x:Name>`,
+                    `<x:WorksheetOptions>`,
+                    `<x:DisplayGridlines/>`,
+                    `</x:WorksheetOptions>`,
+                    `</x:ExcelWorksheet>`,
+                    `</x:ExcelWorksheets>`,
+                    `</x:ExcelWorkbook>`,
+                    `</xml>`,
+            `<![endif]-->`,
+        `</head>`,
+        `<body>`,
+            `<table></table>`,
+        `</body>`,
+    `</html>`
+].join("");
 
-function clearNames() {
-    localStorage.removeItem("x");
-    $("textarea#scriptused_text").val("");
-    UI.SuccessMessage("A játékosok és a hozzászólások számai törlésre kerültek.", 2000);
+(function () {
+    
+    if (game_data.screen === "forum") {
+        createhtml();
+        
+    } else {
+        UI.InfoMessage(
+            "A script csak a fórumon működik, most átirányítunk oda!",1500
+        );
+        
+        setTimeout(function () {
+            window.location.assign(
+                game_data.link_base_pure + 'forum&id=' + game_data.village.id
+            );
+        }, 2000);
+    }
+})();
+
+function createhtml() {
+    container.append(htmlcontent.text);
 }
 
-function resetDates() {
-    localStorage.removeItem("from");
-    localStorage.removeItem("to");
-    defaultInputsValue()
-    $("input#date1")[0].value = localStorage["from"];
-    $("input#date2")[0].value = localStorage["to"];
+function removeDatas() {
+    localStorage.removeItem("forum_activity");
+    clearTextarea();
+    UI.SuccessMessage("A játékosok, a hozzászólások számai és a like-ok törlésre kerültek.", 5000);
 }
 
 function saveInputsValue() {
-    from = $("input#date1")[0].value;
-    to = $("input#date2")[0].value;
-    localStorage.setItem("from", from);
-    localStorage.setItem("to", to);
+    var from = $("input#from").val();
+    var to = $("input#to").val();
+    localStorage.setItem("from", JSON.stringify(from));
+    localStorage.setItem("to", JSON.stringify(to));
+    UI.SuccessMessage("A dátum megváltozott!",1500);
 }
 
-function defaultInputsValue() {
-    localStorage["from"] = localStorage["from"] != null ? localStorage["from"] : formatDateToString(new Date())[0];
-    localStorage["to"] = localStorage["to"] != null ? localStorage["to"] : formatDateToString(new Date())[0];
+function defaultInputsValue(key) {
+    localStorage.setItem(key, localStorage[key] ? localStorage[key] : toISOString());
+    return localStorage[key];
 }
 
-function createInput(callback) {
-    defaultInputsValue()
-    content = `<input type="date" value=${localStorage["from"]} id="date1" name="name">-tól</input>
-               &nbsp;
-               <input type="date" value=${localStorage["to"]} id="date2" name="name">-ig</input>
-               &nbsp;
-               <button type="button" id="button1" onclick="clearNames()">Adatok törlése</button>
-               &nbsp;
-               <button type="button" id="button2" onclick="resetDates()">Dátumok törlése</button>
-               &nbsp;
-               <button type="button" id="button3" onclick="run()">Adatok</button>`;
-    $(".forum-content.clearfix").find("tr").first().after(content);
-    callback()
+function toISOString() {
+    return new Date().toISOString().split('T')[0];
 }
-createInput(loop)
 
-$("#date1, #date2").on('change', function(event) {
-    async function change() {
-        await saveInputsValue();
-        await clearNames();
-        await loop();
-        await run();
+function createTextarea() {
+    container.append(textarea_html);
+}
+
+function clearTextarea() {
+    $(textarea).val("");
+}
+
+function removeTextarea() {
+    $(textarea).remove();
+}
+
+function selectTextarea() {
+    $(textarea).select();
+}
+
+function base64(template) {
+	return window.btoa(unescape(encodeURIComponent(template)));
+}
+
+function initCss(css) {
+    $(`<style>${css}</style>`).appendTo("body");
+}
+
+function today() {
+    return new Date(toISOString()).getTime();
+}
+
+function yesterday() {
+    return today() - 86400000;
+}
+
+function disableButton(id) {
+    $(id).attr("disabled","");
+}
+
+function getLike(post) {
+    var thanks = $('.post').eq(post).find(".thanksnum");
+    var exist = thanks.length;
+    
+    switch (exist) {
+        case 0:
+            return 0
+            break;
+            
+        case 1:
+            return parseInt(thanks.text().match(/\d+/)[0]);
     }
-    change()
-})
+}
 
-$("#button2").on("click", function(event) {
-    async function click() {
-        await resetDates();
-        await saveInputsValue();
-        await clearNames();
-        await loop();
-        await run();
+function getPlayerName(post) {
+    return $(".postheader_left").eq(post)[0].innerText.match(/(.*?)(?:ma ekkor|tegnap ekkor|\d{2}.\d{2}.\d{4})/)[1].replace(/\(törölve\)|.* - /,"").trim();
+}
+
+initCss(`
+    .date:hover {
+        box-shadow: 0 0 5px 3px green !important;
     }
-    click()
-})
-
-$("#button1, #button2, #button3, #date1, #date2").on("mouseenter", function(event) {
-    if (event.target.id == "button1") {
-        $(this).css("box-shadow", "0 0 5px 3px red");
-    } else if (event.target.id == "button2") {
-        $(this).css("box-shadow", "0 0 5px 3px red");
-    } else if (event.target.id == "button3") {
-        $(this).css("box-shadow", "0 0 5px 3px blue");
-    } else if (event.target.id == "date1") {
-        $(this).css("box-shadow", "0 0 5px 3px green");
-    } else if (event.target.id == "date2") {
-        $(this).css("box-shadow", "0 0 5px 3px green");
+    #clearnames:hover, #resetdates:hover {
+        box-shadow: 0 0 5px 3px red !important;
     }
-})
+    #datas:hover {
+        box-shadow: 0 0 5px 3px blue !important;
+    }
+    #save:hover {
+        box-shadow: 0 0 5px 3px green !important;
+    }
+`);
 
-$("#button1, #button2, #button3, #date1, #date2").on("mouseleave", function() {
-    $(this).removeAttr("style");
-})
+function getDate(post) {
+    var date = $(".igmline-date").eq(post).text().match(/(?:ma|tegnap|\d{2}.\d{2}.\d{4})/)[0];
+    
+    switch (date) {
+        case "ma":
+            return today();
+            break;
+            
+        case "tegnap":
+            return yesterday();
+            break;
+            
+        default:
+            return dateToMilliseconds(date);
+    }
+}
 
-function loop() {
-    var array = [];
-    for (var i = 0; i < $("form .post").length; i++) {
-        data = $(".igmline-date")[i].textContent.split(" ")[0];
-        format = formatDateToString(new Date());
-        if (data == "ma") {
-            day = format[3];
-            month = format[2];
-            year = format[1];
-        } else if (data == "tegnap") {
-            day = format[3] - 1;
-            month = format[2];
-            year = format[1];
-        } else {
-            day = data.split(".")[0];
-            month = data.split(".")[1];
-            year = data.split(".")[2];
+function dateToMilliseconds(string) {
+    return new Date(string.split(".").reverse().join("-")).getTime();
+}
+
+// az adatok tárolása gombra kattintva eltárolja az object változóban: név, hozzászólások száma, like
+function addDataToStorage() {
+    storage = localStorage.forum_activity;
+    disableButton("#datas");
+    
+    switch (!storage) {
+        case true:
+            var object = {};
+            break;
+            
+        case false:
+            var object = JSON.parse(storage);
+    }
+
+    for (var i = 0; i < $(".postheader_left").length; i++) {
+        var time = getDate(i);
+        var name = getPlayerName(i);
+        var like = getLike(i);
+
+        switch (true) {
+            case !object[time]:
+                
+                Object.defineProperty(object, time, {
+                    value: {
+                        [name]: [1, like]
+                    },
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                break;
+            case !object[time][name]:
+                
+                Object.defineProperty(object[time], name, {
+                    value: [1, like],
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                break;
+            default:
+                
+                object[time][name][0] += 1;
+                object[time][name][1] += like;
         }
-        if (month < 10) {
-            month = Number(month.charAt(1))
-        }
-        from = (new Date($("#date1").val()).getTime()) / 1000 - 7200;
-        forum = (new Date(year, month - 1, day).getTime()) / 1000;
-        to = (new Date($("#date2").val()).getTime()) / 1000 - 7200;
-        if (from <= forum && forum <= to) {
-            try {
-                array.push($(".postheader_left").eq(i).find("a").last().text().split(" - ")[1].trim());
-            } catch (error) {
-                array.push($(".postheader_left").eq(i).find("a").last().text().trim());
-                array.push($(".postheader_left")[i].childNodes[0].nodeValue.trim().split(" ")[0]);
-            }
-        } else if (forum > to) {
-            UI.InfoMessage("Elérted az időintervallum végét.", 2000);
-        }
     }
-    localStorage["x"] = localStorage["x"] != null ? localStorage["x"] : "";
-    localStorage["x"] += String(array) + ",";
+    localStorage.setItem("forum_activity", JSON.stringify(object));
+    UI.SuccessMessage("Az adatok tárolása megtörtént!",2000)
 }
 
-function output(arr) {
-    var a = [],
-        b = [],
-        prev;
-    arr.sort();
-    for (var i = 0; i < arr.length; i++) {
-        if (arr[i] !== prev) {
-            a.push(arr[i]);
-            b.push(1);
-        } else {
-            b[b.length - 1]++;
-        }
-        prev = arr[i];
+// dátum megváltoztatásakor kigyűjti az adott intervallumnak megfelelő napokat
+function process(from,to) {
+    obj = {}
+    storage = localStorage.forum_activity;
+    
+    switch (!storage) {
+        case true:
+            UI.SuccessMessage("Nincs eltárolt adat. Kattints az adatok eltárolása gombra!",2000);
+            return false;
+            break;
+            
+        case false:
+            var object = JSON.parse(storage);
     }
-    return [a, b];
+    
+    for (key in object) {
+        var interval = parseInt(key) >= from && to >= parseInt(key);
+        
+        switch (interval) {
+            case true:
+                names = Object.keys(object[key]);
+                sumDayDatas(names,object);
+                break;
+            
+            case false:
+                console.log(`Ez a nap nem esik bele az intervallumba: ${key}`);
+        }
+    }
 }
 
-function run() {
-    if (!$("#scriptused_text").is(":visible")) {
-        $(".forum-content.clearfix").find("tbody").first().after('<textarea id="scriptused_text" rows="5" cols="30">');
-        $("textarea#scriptused_text").on("mouseup", function() {
-            $(this).select();
-        })
+// összegzi az obj változóban az intervallumnak megfelelő napok adatait
+function sumDayDatas(names,object) {
+    for (const element of names) {
+        exist = !obj[element];
+        comment = object[key][element][0];
+        like = object[key][element][1];
+
+        switch (exist) {
+            case true:
+                Object.defineProperty(obj, element, {
+                    value: [comment,like],
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                break;
+
+            case false:
+                obj[element][0] += comment;
+                obj[element][1] += like;
+        }
     }
-    for (var i = 1; i < output(localStorage.getItem("x").split(","))[0].length; i++) {
-        $('textarea#scriptused_text').val($('textarea#scriptused_text').val() +
-            output(localStorage.getItem("x").split(","))[0][i] +
-            ": " +
-            output(localStorage.getItem("x").split(","))[1][i] +
-            "\n");
+}
+
+
+function tableToExcel(table) {
+    temp = template.split("<table>");
+	window.location.href = uri + base64(temp[0] + table + temp[1]);
+}
+
+// mentés gombra kattintás
+function save() {
+    from = $("input#from")[0].valueAsNumber;
+    to = $("input#to")[0].valueAsNumber;
+    var proc = process(from,to);
+    var select = $("#sablon").val();
+    
+    switch (proc) {
+        case false:
+            return;
     }
+
+    switch (JSON.stringify(obj) === "{}") {
+        case true:
+            clearTextarea();
+            UI.ErrorMessage("A megatott idő intervallumban nem található fórum hozzásólás!",2000);
+            return;
+            break;
+        case false:
+            var table = createContent();
+    }
+    
+    switch (select) {
+        case "Külső fórum":
+            $(textarea).val(table);
+            UI.SuccessMessage(`Az adatok feldolgozása a ${select}ra megtörtént!`,2000);
+            break;
+        case "Klán fórum":
+            $(textarea).val(table);
+            UI.SuccessMessage(`Az adatok feldolgozása a ${select}ra megtörtént!`,2000);
+            break;
+        case "Excel táblázat":
+            tableToExcel(table);
+            UI.SuccessMessage(`Az adatok feldolgozása az ${select}hoz megtörtént!`,2000);
+    }
+}
+
+function sort() {
+    return Object.entries(obj).sort((a, b) => b[1][0] - a[1][0]);
+}
+
+// sorba rendezés és táblázatok elkészítése
+function createContent() {
+    var text = "";
+    var select = $("#sablon").val();
+    var sorted = sort();
+    removeTextarea();
+    createTextarea();
+    
+    for(var i = 0; i < sorted.length; i++) {
+
+        switch (select) {
+            case "Külső fórum":
+                text += `[TR][TD]${sorted[i][0]}[/TD][TD]${sorted[i][1][0]}[/TD][TD]${sorted[i][1][1]}[/TD][/TR]`;
+                table = `[TABLE][TR][TH]Név[/TH][TH]Hozzászólás[/TH][TH]Like[/TH][/TR]${text}[/TABLE]`;
+                break;
+            case "Klán fórum":
+                text += `[*]${sorted[i][0]}[|]${sorted[i][1][0]}[|]${sorted[i][1][1]}`;
+                table = `[table][**]Név[||]Hozzászólás[||]Like[/**]${text}[/table]`;
+                break;
+            case "Excel táblázat":
+                text += `<tr><td style='mso-number-format:"\@";/*force text*/'>${sorted[i][0]}</td><td>${sorted[i][1][0]}</td><td>${sorted[i][1][1]}</td></tr>`;
+                table = `<table><tr><th>Név</th><th>Hozzászólás</th><th>Like</th></tr>${text}</table>`;
+        }
+    }
+    return table;
 }
 void(0);
