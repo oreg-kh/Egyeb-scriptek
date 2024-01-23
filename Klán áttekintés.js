@@ -1,5 +1,4 @@
 javascript:
-
 var gear = "https://raw.githubusercontent.com/oreg-kh/Unit-and-building-simulator/master/gear.png";
 let token = atob("ZjRiNDIzZWE4MzgxMDJmZmNkMTdmY2M4MDdmY2Y1MTkxZjlkN2I5Yw==");
 var player = game_data.player.name;
@@ -517,7 +516,7 @@ if (game_data.mode == "members_troops") {
                         <font color="green">>1/4 védő</font> <br><span class="icon header population"></span> 1-5.000
                     </center>
                 </th>
-                <th>
+                <th onclick="sumdef()">
                     <center>
                         <font color="green">védők</font> <br> lebontásban
                     </center>
@@ -622,20 +621,14 @@ if (game_data.mode == "members_troops") {
                        <td contenteditable="true" class="column13">${negyed_vedo}</td>
                        <td contenteditable="true" class="column14">${negyedalatt_vedo}</td>
                        <td contenteditable="true" style="text-align:left">
-                           <dl>
-                               <dt><a>
-                                   <img src=${imageSrc.spear}>&emsp;&nbsp;${numberWithCommas(spear)}</img>
-                               </a></dt>
-                               <dt><a>
-                                   <img src=${imageSrc.sword}>&emsp;&nbsp;${numberWithCommas(sword)}</img>
-                               </a></dt>
-                               <dt><a>
-                                   <img src=${imageSrc.archer}>&emsp;&nbsp;${numberWithCommas(archer)}</img>
-                               </a></dt>
-                               <dt><a>
-                                   <img src=${imageSrc.heavy}>&emsp;&nbsp;${numberWithCommas(heavy)}</img>
-                               </a></dt>
-                          </dl>
+                            <img src=${imageSrc.spear}><span class="spear">${numberWithCommas(spear)}</span>
+                        <br>
+                            <img src=${imageSrc.sword}><span class="sword">${numberWithCommas(sword)}</span>
+                        <br>
+                            <img src=${imageSrc.archer}><span class="archer">${numberWithCommas(archer)}</span>
+                        <br>
+                            <img src=${imageSrc.heavy}><span class="heavy">${numberWithCommas(heavy)}</span>
+
                       </td>
                       <td><span class="circle1"></span></td>
                       <td><span class="circle2"></span></td>
@@ -644,6 +637,29 @@ if (game_data.mode == "members_troops") {
 		selector.find("tbody").eq(1).append(row);
 	}
 
+    function sumdef() {
+        var spear = 0;
+        var sword = 0;
+        var archer = 0;
+        var heavy = 0;
+        var len = $(".spear").length;
+        
+        for (var i = 0; i < len; i++) {
+            spear += parseInt($(".spear").eq(i).text().split(".").join(""));
+            sword += parseInt($(".sword").eq(i).text().split(".").join(""));
+            archer += parseInt($(".archer").eq(i).text().split(".").join(""));
+            heavy += parseInt($(".heavy").eq(i).text().split(".").join(""));
+            console.log(spear);
+        }
+        console.log(spear,sword,archer,heavy);
+        alert(`
+            Lándzsás: ${numberWithCommas(spear)}
+            Kardos: ${numberWithCommas(sword)}
+            Íjász: ${numberWithCommas(archer)}
+            Nehézlovas: ${numberWithCommas(heavy)}
+        `);
+    }
+    
 	// megnyit egy excel táblázatot és exportálja a táblázat tartalmát
 	function tableToExcel() {
 		if ($("#" + "myTable").length == 1 && $("#" + "myTable2").length == 1) {
