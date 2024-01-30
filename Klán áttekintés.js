@@ -459,7 +459,7 @@ if (game_data.mode == "members_troops") {
             	</th>
            		<th onclick="sortTable(2)">
               		<center>
-                		<font color="black">Гњres</font> <br><span class="icon header population"></span> 0
+                		<font color="black">Üres</font> <br><span class="icon header population"></span> 0
               		</center>
                 </th>
                 <th onclick="sortTable(3)">
