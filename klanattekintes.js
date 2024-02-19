@@ -1,4 +1,5 @@
 javascript:
+console.log("teszt_1");
 var gear = "https://raw.githubusercontent.com/oreg-kh/Unit-and-building-simulator/master/gear.png";
 let token = atob("ZjRiNDIzZWE4MzgxMDJmZmNkMTdmY2M4MDdmY2Y1MTkxZjlkN2I5Yw==");
 var player = game_data.player.name;
